@@ -52,8 +52,6 @@ function getPieceValue(piece) {
   } else {
     return -value;
   }
-
-
 }
 
 
