@@ -13,10 +13,9 @@ var $pgn = $('#pgn')
 // AI part
 
 
-function getNextMove(game) {
+function getNextMove() {
   const possibleMoves = game.moves()
-  const nextMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
-  return nextMove
+  return possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
 }
 
 
@@ -43,9 +42,9 @@ function onDrop (source, target) {
   // illegal move
   if (move === null) return 'snapback'
 
-  updateStatus()
 
-  window.setTimeout(game.move(getNextMove(game)),250)
+  game.move(getNextMove());
+  updateStatus()
 }
 
 // update the board position after the piece snap
