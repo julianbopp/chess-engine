@@ -18,6 +18,44 @@ function getNextMove() {
   return possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
 }
 
+function evaluateBoard() {
+  let score = 0;
+  for (let i = 0; i < 8; i++) {
+    for (let j = 0; j < 8; j++) {
+      score = score + getPieceValue(board[i][j]);
+    }
+  }
+}
+
+function getPieceValue(piece) {
+  let value = 0;
+  if (piece === null) {
+    return value;
+  }
+
+  if (piece.type === "r") {
+    value = 10;
+  } else if (piece.type === 'r') {
+    value = 50;
+  } else if (piece.type === 'n') {
+    value = 30;
+  } else if (piece.type === 'b') {
+    value = 30 ;
+  } else if (piece.type === 'q') {
+    value = 90;
+  } else if (piece.type === 'k') {
+    value = 900;
+  }
+
+  if (piece.color === "w") {
+    return value;
+  } else {
+    return -value;
+  }
+
+
+}
+
 
 //
 
