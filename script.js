@@ -9,13 +9,25 @@ var $status = $('#status')
 var $fen = $('#fen')
 var $pgn = $('#pgn')
 
+
+// AI part
+
+
+function getNextMove(game) {
+  const possibleMoves = game.moves()
+  const nextMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
+  return nextMove
+}
+
+
+//
+
 function onDragStart (source, piece, position, orientation) {
   // do not pick up pieces if the game is over
   if (game.game_over()) return false
 
-  // only pick up pieces for the side to move
-  if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-    (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+  // only pick up pieces for white
+  if ((piece.search(/^b/) !== -1)) {
     return false
   }
 }
@@ -32,6 +44,8 @@ function onDrop (source, target) {
   if (move === null) return 'snapback'
 
   updateStatus()
+
+  window.setTimeout(game.move(getNextMove(game)),250)
 }
 
 // update the board position after the piece snap
@@ -81,5 +95,5 @@ var config = {
   onSnapEnd: onSnapEnd
 }
 board = Chessboard('myBoard', config)
-
 updateStatus()
+
