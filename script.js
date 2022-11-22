@@ -17,19 +17,93 @@ function getNextMove() {
   var possibleMoves = game.moves()
   var bestMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
 
-  var currentScore = -evaluateBoard(game.board())
+  // var currentScore = -evaluateBoard(game.board())
+  // for (let i = 0; i < possibleMoves.length; i++) {
+  //   let move = possibleMoves[i]
+  //   game.move(move);
+  //   var newScore = -evaluateBoard(game.board())
+  //   game.undo();
+  //   if (newScore > currentScore) {
+  //     currentScore = newScore;
+  //     bestMove = move;
+  //   }
+  // }
+  let maybe = minimaxRoot(3,false);
+  if (!(maybe === null)) {
+    return maybe
+  }
+  return bestMove
+
+}
+
+function minimaxRoot(depth, maximizingPlayer) {
+  let bestMove = null;
+  let bestScore;
+  if (maximizingPlayer) {
+    bestScore = -99999
+  } else {
+    bestScore = 99999
+  }
+
+  const possibleMoves = game.moves()
   for (let i = 0; i < possibleMoves.length; i++) {
     let move = possibleMoves[i]
-    game.move(move);
-    var newScore = -evaluateBoard(game.board())
-    game.undo();
-    if (newScore > currentScore) {
-      currentScore = newScore;
-      bestMove = move;
+
+    game.move(move)
+    let score = minimax(depth - 1, !maximizingPlayer)
+    game.undo()
+
+    if (score >= bestScore && maximizingPlayer) {
+      bestScore = score;
+      bestMove  = move
+    }
+
+    if (score <= bestScore && !maximizingPlayer) {
+      bestScore = score;
+      bestMove = move
     }
   }
-  return bestMove;
+  return bestMove
 }
+
+function minimax(depth, maximizingPlayer) {
+  if (depth === 0) {
+    return evaluateBoard(game.board())
+  }
+
+  if (maximizingPlayer) {
+    let maxScore = -99999
+    const possibleMoves = game.moves()
+
+    for (let i = 0; i < possibleMoves.length; i++) {
+      let move = possibleMoves[i];
+      game.move(move)
+      let score = minimax(depth - 1, false)
+      game.undo()
+
+      if (score >= maxScore) {
+        maxScore = score
+      }
+    }
+    return maxScore
+  } else {
+    let minScore = 99999
+    const possibleMoves = game.moves()
+
+    for (let i = 0; i < possibleMoves.length; i++) {
+      let move = possibleMoves[i];
+      game.move(move)
+      let score = minimax(depth - 1, true)
+      game.undo()
+
+      if (score <= minScore) {
+        minScore = score
+      }
+    }
+    return minScore
+  }
+}
+
 
 function evaluateBoard(gameboard) {
   let score = 0;
@@ -37,7 +111,6 @@ function evaluateBoard(gameboard) {
     for (let j = 0; j < 8; j++) {
       if (true) {
         score = score + getPieceValue(gameboard[i][j])
-        console.log(getPieceValue(gameboard[i][j]))
       }
     }
   }
@@ -67,11 +140,7 @@ function getPieceValue(piece) {
 
 }
 
-function alphaBetaMax(alpha, beta, depthleft) {
-  if (depthleft === 0) {
-    return evaluateBoard(game)
-  }
-}
+
 
 //
 
@@ -95,8 +164,10 @@ function onDrop (source, target) {
 
   // illegal move
   if (move === null) return 'snapback'
-  game.move(getNextMove())
+
+
   updateStatus()
+  game.move(getNextMove())
 }
 
 // update the board position after the piece snap
