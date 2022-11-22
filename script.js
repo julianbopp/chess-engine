@@ -95,7 +95,6 @@ function onDrop (source, target) {
 
   // illegal move
   if (move === null) return 'snapback'
-  console.log(game.ascii())
   game.move(getNextMove())
   updateStatus()
 }
