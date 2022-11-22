@@ -14,17 +14,34 @@ var $pgn = $('#pgn')
 
 
 function getNextMove() {
-  const possibleMoves = game.moves()
-  return possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
+  var possibleMoves = game.moves()
+  var bestMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
+
+  var currentScore = -evaluateBoard(game.board())
+  for (let i = 0; i < possibleMoves.length; i++) {
+    let move = possibleMoves[i]
+    game.move(move);
+    var newScore = -evaluateBoard(game.board())
+    game.undo();
+    if (newScore > currentScore) {
+      currentScore = newScore;
+      bestMove = move;
+    }
+  }
+  return bestMove;
 }
 
-function evaluateBoard() {
+function evaluateBoard(gameboard) {
   let score = 0;
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
-      score = score + getPieceValue(board[i][j]);
+      if (true) {
+        score = score + getPieceValue(gameboard[i][j])
+        console.log(getPieceValue(gameboard[i][j]))
+      }
     }
   }
+  return score;
 }
 
 function getPieceValue(piece) {
@@ -33,7 +50,7 @@ function getPieceValue(piece) {
     return value;
   }
 
-  if (piece.type === "r") {
+  if (piece.type === "p") {
     value = 10;
   } else if (piece.type === 'r') {
     value = 50;
@@ -46,14 +63,15 @@ function getPieceValue(piece) {
   } else if (piece.type === 'k') {
     value = 900;
   }
+  return piece.color === 'w' ? value : -value;
 
-  if (piece.color === "w") {
-    return value;
-  } else {
-    return -value;
-  }
 }
 
+function alphaBetaMax(alpha, beta, depthleft) {
+  if (depthleft === 0) {
+    return evaluateBoard(game)
+  }
+}
 
 //
 
@@ -77,9 +95,8 @@ function onDrop (source, target) {
 
   // illegal move
   if (move === null) return 'snapback'
-
-
-  game.move(getNextMove());
+  console.log(game.ascii())
+  game.move(getNextMove())
   updateStatus()
 }
 
