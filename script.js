@@ -9,11 +9,9 @@ var $status = $('#status')
 var $fen = $('#fen')
 var $pgn = $('#pgn')
 
-
 // AI part
 
-
-function getNextMove() {
+function getNextMove () {
   var possibleMoves = game.moves()
   var bestMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
 
@@ -28,7 +26,7 @@ function getNextMove() {
   //     bestMove = move;
   //   }
   // }
-  let maybe = minimaxRoot(3,false);
+  let maybe = minimaxRoot(3, false)
   if (!(maybe === null)) {
     return maybe
   }
@@ -36,9 +34,9 @@ function getNextMove() {
 
 }
 
-function minimaxRoot(depth, maximizingPlayer) {
-  let bestMove = null;
-  let bestScore;
+function minimaxRoot (depth, maximizingPlayer) {
+  let bestMove = null
+  let bestScore
   if (maximizingPlayer) {
     bestScore = -99999
   } else {
@@ -54,21 +52,21 @@ function minimaxRoot(depth, maximizingPlayer) {
     game.undo()
 
     if (score >= bestScore && maximizingPlayer) {
-      bestScore = score;
-      bestMove  = move
+      bestScore = score
+      bestMove = move
     }
 
     if (score <= bestScore && !maximizingPlayer) {
-      bestScore = score;
+      bestScore = score
       bestMove = move
     }
   }
   return bestMove
 }
 
-function alphabetaRoot(depth, maximizingPlayer) {
-  let bestMove = null;
-  let bestScore;
+function alphabetaRoot (depth, maximizingPlayer) {
+  let bestMove = null
+  let bestScore
   if (maximizingPlayer) {
     bestScore = -99999
   } else {
@@ -79,59 +77,61 @@ function alphabetaRoot(depth, maximizingPlayer) {
   for (let i = 0; i < possibleMoves.length; i++) {
     let move = possibleMoves[i]
 
-    game.move(move);
-    let score = alphabeta(depth - 1, -10000, 10000, !maximizingPlayer);
-    game.undo();
+    game.move(move)
+    let score = alphabeta(depth - 1, -10000, 10000, !maximizingPlayer)
+    game.undo()
 
     if (score >= bestScore && maximizingPlayer) {
-      bestScore = score;
-      bestMove  = move;
+      bestScore = score
+      bestMove = move
     }
 
     if (score <= bestScore && !maximizingPlayer) {
-      bestScore = score;
-      bestMove = move;
+      bestScore = score
+      bestMove = move
     }
   }
-  return bestMove;
+  return bestMove
 }
-function alphabeta(depth, alpha, beta, maximizingPlayer) {
+
+function alphabeta (depth, alpha, beta, maximizingPlayer) {
   if (depth === 0) {
     return evaluateBoard(game.board())
   }
 
-  const possibleMoves = game.moves();
+  const possibleMoves = game.moves()
   if (maximizingPlayer) {
-    let maxScore = -99999;
+    let maxScore = -99999
 
     for (let i = 0; i < possibleMoves.length; i++) {
-      let move = possibleMoves[i];
-      game.move(move);
-      maxScore = Math.max(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer));
-      alpha = Math.max(alpha, maxScore);
+      let move = possibleMoves[i]
+      game.move(move)
+      maxScore = Math.max(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer))
+      alpha = Math.max(alpha, maxScore)
 
       if (beta <= alpha) {
-        return maxScore;
+        return maxScore
       }
     }
-    return maxScore;
+    return maxScore
   } else {
-    let maxScore = 99999;
+    let maxScore = 99999
 
     for (let i = 0; i < possibleMoves.length; i++) {
-      game.move(move);
-      maxScore = Math.min(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer));
-      game.undo();
-      beta = Math.min(beta, maxScore);
+      game.move(move)
+      maxScore = Math.min(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer))
+      game.undo()
+      beta = Math.min(beta, maxScore)
       if (beta <= alpha) {
-        return maxScore;
+        return maxScore
       }
     }
-    return maxScore;
+    return maxScore
   }
 
 }
-function minimax(depth, maximizingPlayer) {
+
+function minimax (depth, maximizingPlayer) {
   if (depth === 0) {
     return evaluateBoard(game.board())
   }
@@ -141,7 +141,7 @@ function minimax(depth, maximizingPlayer) {
     const possibleMoves = game.moves()
 
     for (let i = 0; i < possibleMoves.length; i++) {
-      let move = possibleMoves[i];
+      let move = possibleMoves[i]
       game.move(move)
       let score = minimax(depth - 1, false)
       game.undo()
@@ -156,7 +156,7 @@ function minimax(depth, maximizingPlayer) {
     const possibleMoves = game.moves()
 
     for (let i = 0; i < possibleMoves.length; i++) {
-      let move = possibleMoves[i];
+      let move = possibleMoves[i]
       game.move(move)
       let score = minimax(depth - 1, true)
       game.undo()
@@ -169,9 +169,8 @@ function minimax(depth, maximizingPlayer) {
   }
 }
 
-
-function evaluateBoard(gameboard) {
-  let score = 0;
+function evaluateBoard (gameboard) {
+  let score = 0
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
       if (true) {
@@ -179,33 +178,31 @@ function evaluateBoard(gameboard) {
       }
     }
   }
-  return score;
+  return score
 }
 
-function getPieceValue(piece) {
-  let value = 0;
+function getPieceValue (piece) {
+  let value = 0
   if (piece === null) {
-    return value;
+    return value
   }
 
-  if (piece.type === "p") {
-    value = 10;
+  if (piece.type === 'p') {
+    value = 10
   } else if (piece.type === 'r') {
-    value = 50;
+    value = 50
   } else if (piece.type === 'n') {
-    value = 30;
+    value = 30
   } else if (piece.type === 'b') {
-    value = 30 ;
+    value = 30
   } else if (piece.type === 'q') {
-    value = 90;
+    value = 90
   } else if (piece.type === 'k') {
-    value = 900;
+    value = 900
   }
-  return piece.color === 'w' ? value : -value;
+  return piece.color === 'w' ? value : -value
 
 }
-
-
 
 //
 
@@ -230,18 +227,17 @@ function onDrop (source, target) {
   // illegal move
   if (move === null) return 'snapback'
 
-
   updateStatus()
-  window.setTimeout(MakeBestMove,250);
+  window.setTimeout(MakeBestMove, 250)
 
 }
 
-function MakeBestMove() {
-  var bestMove = getNextMove();
-  game.move(bestMove);
-  board.position(game.fen());
+function MakeBestMove () {
+  var bestMove = getNextMove()
+  game.move(bestMove)
+  board.position(game.fen())
   if (game.game_over()) {
-    alert("Game over");
+    alert('Game over')
   }
 }
 
