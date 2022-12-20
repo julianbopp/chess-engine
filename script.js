@@ -11,7 +11,7 @@ var $pgn = $('#pgn')
 
 // AI part
 
-function getNextMove () {
+function getNextMove (alphabeta, depth) {
   var possibleMoves = game.moves()
   var bestMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
 
@@ -26,7 +26,11 @@ function getNextMove () {
   //     bestMove = move;
   //   }
   // }
-  let maybe = minimaxRoot(3, false)
+  if (alphabeta) {
+    var maybe = alphabetaRoot(depth, false)
+  } else {
+    var maybe = minimaxRoot(depth, false)
+  }
   if (!(maybe === null)) {
     return maybe
   }
@@ -107,6 +111,7 @@ function alphabeta (depth, alpha, beta, maximizingPlayer) {
       let move = possibleMoves[i]
       game.move(move)
       maxScore = Math.max(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer))
+      game.undo()
       alpha = Math.max(alpha, maxScore)
 
       if (beta <= alpha) {
@@ -118,6 +123,7 @@ function alphabeta (depth, alpha, beta, maximizingPlayer) {
     let maxScore = 99999
 
     for (let i = 0; i < possibleMoves.length; i++) {
+      let move = possibleMoves[i]
       game.move(move)
       maxScore = Math.min(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer))
       game.undo()
@@ -233,7 +239,9 @@ function onDrop (source, target) {
 }
 
 function MakeBestMove () {
-  var bestMove = getNextMove()
+  let depth = 3
+  let alphabeta = true
+  var bestMove = getNextMove(alphabeta, depth)
   game.move(bestMove)
   board.position(game.fen())
   if (game.game_over()) {
