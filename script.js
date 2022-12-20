@@ -8,7 +8,8 @@ var game = new Chess()
 var $status = $('#status')
 var $fen = $('#fen')
 var $pgn = $('#pgn')
-
+var $minmax = $('#minmax')
+var $alphabeta = $('#alphabeta')
 // AI part
 
 function getNextMove (alphabeta, depth) {
@@ -98,7 +99,9 @@ function alphabetaRoot (depth, maximizingPlayer) {
   return bestMove
 }
 
+var alphabetacount = 0;
 function alphabeta (depth, alpha, beta, maximizingPlayer) {
+  alphabetacount++
   if (depth === 0) {
     return evaluateBoard(game.board())
   }
@@ -137,7 +140,9 @@ function alphabeta (depth, alpha, beta, maximizingPlayer) {
 
 }
 
+var minimaxcount = 0;
 function minimax (depth, maximizingPlayer) {
+  minimaxcount++
   if (depth === 0) {
     return evaluateBoard(game.board())
   }
@@ -286,6 +291,8 @@ function updateStatus () {
   $status.html(status)
   $fen.html(game.fen())
   $pgn.html(game.pgn())
+  $minmax.html(minimaxcount)
+  $alphabeta.html(alphabetacount)
 }
 
 var config = {
