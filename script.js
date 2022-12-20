@@ -66,6 +66,71 @@ function minimaxRoot(depth, maximizingPlayer) {
   return bestMove
 }
 
+function alphabetaRoot(depth, maximizingPlayer) {
+  let bestMove = null;
+  let bestScore;
+  if (maximizingPlayer) {
+    bestScore = -99999
+  } else {
+    bestScore = 99999
+  }
+
+  const possibleMoves = game.moves()
+  for (let i = 0; i < possibleMoves.length; i++) {
+    let move = possibleMoves[i]
+
+    game.move(move);
+    let score = alphabeta(depth - 1, -10000, 10000, !maximizingPlayer);
+    game.undo();
+
+    if (score >= bestScore && maximizingPlayer) {
+      bestScore = score;
+      bestMove  = move;
+    }
+
+    if (score <= bestScore && !maximizingPlayer) {
+      bestScore = score;
+      bestMove = move;
+    }
+  }
+  return bestMove;
+}
+function alphabeta(depth, alpha, beta, maximizingPlayer) {
+  if (depth === 0) {
+    return evaluateBoard(game.board())
+  }
+
+  const possibleMoves = game.moves();
+  if (maximizingPlayer) {
+    let maxScore = -99999;
+
+    for (let i = 0; i < possibleMoves.length; i++) {
+      let move = possibleMoves[i];
+      game.move(move);
+      maxScore = Math.max(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer));
+      alpha = Math.max(alpha, maxScore);
+
+      if (beta <= alpha) {
+        return maxScore;
+      }
+    }
+    return maxScore;
+  } else {
+    let maxScore = 99999;
+
+    for (let i = 0; i < possibleMoves.length; i++) {
+      game.move(move);
+      maxScore = Math.min(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer));
+      game.undo();
+      beta = Math.min(beta, maxScore);
+      if (beta <= alpha) {
+        return maxScore;
+      }
+    }
+    return maxScore;
+  }
+
+}
 function minimax(depth, maximizingPlayer) {
   if (depth === 0) {
     return evaluateBoard(game.board())
