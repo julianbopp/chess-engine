@@ -246,7 +246,11 @@ function onDrop (source, target) {
 function MakeBestMove () {
   let depth = 3
   let alphabeta = true
+  let both = false;
   var bestMove = getNextMove(alphabeta, depth)
+  if (both) {
+    bestMove = getNextMove(!alphabeta, depth);
+  }
   game.move(bestMove)
   board.position(game.fen())
   if (game.game_over()) {
