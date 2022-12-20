@@ -10,6 +10,7 @@ var $fen = $('#fen')
 var $pgn = $('#pgn')
 var $minmax = $('#minmax')
 var $alphabeta = $('#alphabeta')
+
 // AI part
 
 function getNextMove (alphabeta, depth) {
@@ -99,7 +100,8 @@ function alphabetaRoot (depth, maximizingPlayer) {
   return bestMove
 }
 
-var alphabetacount = 0;
+var alphabetacount = 0
+
 function alphabeta (depth, alpha, beta, maximizingPlayer) {
   alphabetacount++
   if (depth === 0) {
@@ -140,7 +142,8 @@ function alphabeta (depth, alpha, beta, maximizingPlayer) {
 
 }
 
-var minimaxcount = 0;
+var minimaxcount = 0
+
 function minimax (depth, maximizingPlayer) {
   minimaxcount++
   if (depth === 0) {
@@ -185,31 +188,113 @@ function evaluateBoard (gameboard) {
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
       if (true) {
-        score = score + getPieceValue(gameboard[i][j])
+        score = score + getPieceValue(gameboard[i][j], i, j)
       }
     }
   }
   return score
 }
 
-function getPieceValue (piece) {
+var reverseArray = function (array) {
+  return array.slice().reverse()
+}
+
+var pawnEvalWhite =
+  [
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0],
+    [1.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 1.0],
+    [0.5, 0.5, 1.0, 2.5, 2.5, 1.0, 0.5, 0.5],
+    [0.0, 0.0, 0.0, 2.0, 2.0, 0.0, 0.0, 0.0],
+    [0.5, -0.5, -1.0, 0.0, 0.0, -1.0, -0.5, 0.5],
+    [0.5, 1.0, 1.0, -2.0, -2.0, 1.0, 1.0, 0.5],
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  ]
+
+var pawnEvalBlack = reverseArray(pawnEvalWhite)
+
+var knightEval =
+  [
+    [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0],
+    [-4.0, -2.0, 0.0, 0.0, 0.0, 0.0, -2.0, -4.0],
+    [-3.0, 0.0, 1.0, 1.5, 1.5, 1.0, 0.0, -3.0],
+    [-3.0, 0.5, 1.5, 2.0, 2.0, 1.5, 0.5, -3.0],
+    [-3.0, 0.0, 1.5, 2.0, 2.0, 1.5, 0.0, -3.0],
+    [-3.0, 0.5, 1.0, 1.5, 1.5, 1.0, 0.5, -3.0],
+    [-4.0, -2.0, 0.0, 0.5, 0.5, 0.0, -2.0, -4.0],
+    [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0]
+  ]
+
+var bishopEvalWhite = [
+  [-2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0],
+  [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0],
+  [-1.0, 0.0, 0.5, 1.0, 1.0, 0.5, 0.0, -1.0],
+  [-1.0, 0.5, 0.5, 1.0, 1.0, 0.5, 0.5, -1.0],
+  [-1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, -1.0],
+  [-1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0],
+  [-1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, -1.0],
+  [-2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0]
+]
+
+var bishopEvalBlack = reverseArray(bishopEvalWhite)
+
+var rookEvalWhite = [
+  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+  [0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5],
+  [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.5],
+  [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.5],
+  [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.5],
+  [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.5],
+  [-0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.5],
+  [0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0]
+]
+
+var rookEvalBlack = reverseArray(rookEvalWhite)
+
+var evalQueen =
+  [
+    [-2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0],
+    [-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0],
+    [-1.0, 0.0, 0.5, 0.5, 0.5, 0.5, 0.0, -1.0],
+    [-0.5, 0.0, 0.5, 0.5, 0.5, 0.5, 0.0, -0.5],
+    [0.0, 0.0, 0.5, 0.5, 0.5, 0.5, 0.0, -0.5],
+    [-1.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.0, -1.0],
+    [-1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, -1.0],
+    [-2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0]
+  ]
+
+var kingEvalWhite = [
+
+  [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+  [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+  [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+  [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+  [-2.0, -3.0, -3.0, -4.0, -4.0, -3.0, -3.0, -2.0],
+  [-1.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -1.0],
+  [2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 2.0, 2.0],
+  [2.0, 3.0, 1.0, 0.0, 0.0, 1.0, 3.0, 2.0]
+]
+
+var kingEvalBlack = reverseArray(kingEvalWhite)
+
+function getPieceValue (piece, x, y) {
   let value = 0
   if (piece === null) {
     return value
   }
 
   if (piece.type === 'p') {
-    value = 10
+    value = 10 + (piece.color === 'w' ? pawnEvalWhite[y][x] : pawnEvalBlack[y][x])
   } else if (piece.type === 'r') {
-    value = 50
+    value = 50 + (piece.color === 'w' ? rookEvalWhite[y][x] : rookEvalBlack[y][x])
   } else if (piece.type === 'n') {
-    value = 30
+    value = 30 + (piece.color === 'w' ? knightEval[y][x] : knightEval[y][x]);
   } else if (piece.type === 'b') {
-    value = 30
+    value = 30 + (piece.color === 'w' ? bishopEvalWhite[y][x] : bishopEvalBlack[y][x]);
   } else if (piece.type === 'q') {
-    value = 90
+    value = 90 + (piece.color === 'w' ? evalQueen[y][x] : evalQueen[y][x]);
   } else if (piece.type === 'k') {
-    value = 900
+    value = 900 + (piece.color === 'w' ? kingEvalWhite[y][x] : kingEvalBlack[y][x]);
   }
   return piece.color === 'w' ? value : -value
 
