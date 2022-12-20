@@ -167,7 +167,17 @@ function onDrop (source, target) {
 
 
   updateStatus()
-  game.move(getNextMove())
+  window.setTimeout(MakeBestMove,250);
+
+}
+
+function MakeBestMove() {
+  var bestMove = getNextMove();
+  game.move(bestMove);
+  board.position(game.fen());
+  if (game.game_over()) {
+    alert("Game over");
+  }
 }
 
 // update the board position after the piece snap
