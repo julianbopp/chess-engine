@@ -13,7 +13,7 @@ var $alphabeta = $('#alphabeta')
 
 // AI part
 
-function getNextMove (alphabeta, depth) {
+function getNextMove (alphabeta, depth, ordering) {
   var possibleMoves = game.moves()
   var bestMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)]
 
@@ -29,7 +29,7 @@ function getNextMove (alphabeta, depth) {
   //   }
   // }
   if (alphabeta) {
-    var maybe = alphabetaRoot(depth, false)
+    var maybe = alphabetaRoot(depth, false, ordering)
   } else {
     var maybe = minimaxRoot(depth, false)
   }
@@ -70,7 +70,7 @@ function minimaxRoot (depth, maximizingPlayer) {
   return bestMove
 }
 
-function alphabetaRoot (depth, maximizingPlayer) {
+function alphabetaRoot (depth, maximizingPlayer, ordering) {
   let bestMove = null
   let bestScore
   if (maximizingPlayer) {
@@ -79,12 +79,17 @@ function alphabetaRoot (depth, maximizingPlayer) {
     bestScore = 99999
   }
 
-  const possibleMoves = game.moves()
+  if (ordering) {
+    var possibleMoves = mvvlva();
+  } else {
+    var possibleMoves = game.moves()
+  }
+
   for (let i = 0; i < possibleMoves.length; i++) {
     let move = possibleMoves[i]
 
     game.move(move)
-    let score = alphabeta(depth - 1, -10000, 10000, !maximizingPlayer)
+    let score = alphabeta(depth - 1, -10000, 10000, !maximizingPlayer, ordering)
     game.undo()
 
     if (score >= bestScore && maximizingPlayer) {
@@ -102,17 +107,22 @@ function alphabetaRoot (depth, maximizingPlayer) {
 
 var alphabetacount = 0
 
-function alphabeta (depth, alpha, beta, maximizingPlayer) {
+function alphabeta (depth, alpha, beta, maximizingPlayer, ordering) {
   alphabetacount++
   if (depth === 0) {
     return evaluateBoard(game.board())
   }
 
-  const possibleMoves = game.moves()
+  if (ordering) {
+    var possibleMoves = mvvlva();
+  } else {
+    var possibleMoves = game.moves({ verbose: true })
+  }
   if (maximizingPlayer) {
     let maxScore = -99999
 
     for (let i = 0; i < possibleMoves.length; i++) {
+      alphabetacount++
       let move = possibleMoves[i]
       game.move(move)
       maxScore = Math.max(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer))
@@ -128,6 +138,7 @@ function alphabeta (depth, alpha, beta, maximizingPlayer) {
     let maxScore = 99999
 
     for (let i = 0; i < possibleMoves.length; i++) {
+      alphabetacount++
       let move = possibleMoves[i]
       game.move(move)
       maxScore = Math.min(maxScore, alphabeta(depth - 1, alpha, beta, !maximizingPlayer))
@@ -145,7 +156,6 @@ function alphabeta (depth, alpha, beta, maximizingPlayer) {
 var minimaxcount = 0
 
 function minimax (depth, maximizingPlayer) {
-  minimaxcount++
   if (depth === 0) {
     return evaluateBoard(game.board())
   }
@@ -155,6 +165,7 @@ function minimax (depth, maximizingPlayer) {
     const possibleMoves = game.moves()
 
     for (let i = 0; i < possibleMoves.length; i++) {
+      minimaxcount++
       let move = possibleMoves[i]
       game.move(move)
       let score = minimax(depth - 1, false)
@@ -170,6 +181,7 @@ function minimax (depth, maximizingPlayer) {
     const possibleMoves = game.moves()
 
     for (let i = 0; i < possibleMoves.length; i++) {
+      minimaxcount++
       let move = possibleMoves[i]
       game.move(move)
       let score = minimax(depth - 1, true)
@@ -193,6 +205,54 @@ function evaluateBoard (gameboard) {
     }
   }
   return score
+}
+
+var mvvlvaTable =
+  [
+    [0, 0, 0, 0, 0, 0, 0],       // victim K, attacker K, Q, R, B, N, P, None
+    [50, 51, 52, 53, 54, 55, 0], // victim Q, attacker K, Q, R, B, N, P, None
+    [40, 41, 42, 43, 44, 45, 0], // victim R, attacker K, Q, R, B, N, P, None
+    [30, 31, 32, 33, 34, 35, 0], // victim B, attacker K, Q, R, B, N, P, None
+    [20, 21, 22, 23, 24, 25, 0], // victim N, attacker K, Q, R, B, N, P, None
+    [10, 11, 12, 13, 14, 15, 0], // victim P, attacker K, Q, R, B, N, P, None
+    [0, 0, 0, 0, 0, 0, 0],       // victim None, attacker K, Q, R, B, N, P, None
+  ]
+
+function getPieceNumber (piece) {
+  if (piece === 'k') {
+    return 0
+  }
+  if (piece === 'q') {
+    return 1
+  }
+  if (piece === 'r') {
+    return 2
+  }
+  if (piece === 'b') {
+    return 3
+  }
+  if (piece === 'n') {
+    return 4
+  }
+  if (piece === 'p') {
+    return 5
+  }
+}
+
+function mvvlva () {
+  let possibleMoves = game.moves({ verbose: true })
+  for (let i = 0; i < possibleMoves.length; i++) {
+    let move = possibleMoves[i]
+    move.importance = 0
+
+    if (move.flags.includes('c')) {
+      let victimNumber = getPieceNumber(move.captured)
+      let attackNumber = getPieceNumber(move.piece)
+      move.importance = mvvlvaTable[victimNumber][attackNumber]
+    }
+  }
+  possibleMoves.sort((a, b) => b.importance - a.importance)
+  return possibleMoves
 }
 
 var reverseArray = function (array) {
@@ -288,13 +348,13 @@ function getPieceValue (piece, x, y) {
   } else if (piece.type === 'r') {
     value = 50 + (piece.color === 'w' ? rookEvalWhite[y][x] : rookEvalBlack[y][x])
   } else if (piece.type === 'n') {
-    value = 30 + (piece.color === 'w' ? knightEval[y][x] : knightEval[y][x]);
+    value = 30 + (piece.color === 'w' ? knightEval[y][x] : knightEval[y][x])
   } else if (piece.type === 'b') {
-    value = 30 + (piece.color === 'w' ? bishopEvalWhite[y][x] : bishopEvalBlack[y][x]);
+    value = 30 + (piece.color === 'w' ? bishopEvalWhite[y][x] : bishopEvalBlack[y][x])
   } else if (piece.type === 'q') {
-    value = 90 + (piece.color === 'w' ? evalQueen[y][x] : evalQueen[y][x]);
+    value = 90 + (piece.color === 'w' ? evalQueen[y][x] : evalQueen[y][x])
   } else if (piece.type === 'k') {
-    value = 900 + (piece.color === 'w' ? kingEvalWhite[y][x] : kingEvalBlack[y][x]);
+    value = 900 + (piece.color === 'w' ? kingEvalWhite[y][x] : kingEvalBlack[y][x])
   }
   return piece.color === 'w' ? value : -value
 
@@ -331,12 +391,14 @@ function onDrop (source, target) {
 function MakeBestMove () {
   let depth = 3
   let alphabeta = true
-  var bestMove = getNextMove(alphabeta, depth)
+  let ordering = true
+  var bestMove = getNextMove(alphabeta, depth, ordering)
   game.move(bestMove)
   board.position(game.fen())
   if (game.game_over()) {
     alert('Game over')
   }
+  updateStatus()
 }
 
 // update the board position after the piece snap
@@ -388,5 +450,7 @@ var config = {
   onSnapEnd: onSnapEnd
 }
 board = Chessboard('myBoard', config)
+game.load('r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1')
+board.position(game.fen())
 updateStatus()
 
